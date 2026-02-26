@@ -27,9 +27,5 @@ spec:
               value: "root"
             - name: DB_PASSWORD
               value: "password"
-              valueFrom:
-                secretKeyRef:
-                  name: "my-app-mysql" 
-                  key: mysql-root-password
           ports:
             - containerPort: 8080
