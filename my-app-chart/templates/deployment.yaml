@@ -18,7 +18,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: DB_HOST
-              value: "{{ .Release.Name }}-mysql"
+              value: "my-app-mysql" 
             - name: DB_PORT
               value: "3306"
             - name: DB_NAME
@@ -28,7 +28,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: my-app-mysql
+                  name: "my-app-mysql" 
                   key: mysql-root-password
           ports:
             - containerPort: 8080
