@@ -56,8 +56,10 @@ jobs:
           helm dependency update ./my-app-chart
           helm install my-app ./my-app-chart \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
-            --set image.tag=${{ env.IMAGE_TAG }} \
-            --timeout 10m
+            --set image.tag=${{ env.IMAGE_TAG }}
+          
+          echo "Waiting for MySQL to be ready..."
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=mysql --timeout=300s
 
       - name: Validation Test
         run: |
