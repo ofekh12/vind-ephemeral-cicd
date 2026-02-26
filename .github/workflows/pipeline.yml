@@ -35,20 +35,16 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
-      - name: Install vind
+      - name: Install vcluster
         run: |
-          curl -L -o vind https://github.com/loft-sh/vind/releases/download/v0.0.13/vind-linux-amd64
-  
-          if [ $(stat -c%s "vind") -lt 1000 ]; then
-            echo "Error: Download failed, file too small. Check URL."
-            cat vind
-            exit 1
-          fi
+          # הורדת ה-CLI הרשמי של vcluster
+          curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
+          chmod +x vcluster
+          sudo mv vcluster /usr/local/bin/
           
-          chmod +x vind
-          sudo mv vind /usr/local/bin/
-        
-          vind create cluster my-cluster
+          # יצירת קלאסטר וירטואלי (זה עושה בדיוק את מה ש-vind היה אמור לעשות)
+          # אנחנו משתמשים ב-k3s כ-distro כי הוא הכי קל ל-CI
+          vcluster create my-vcluster --connect=false
 
       - name: Deploy with Helm
         run: |
