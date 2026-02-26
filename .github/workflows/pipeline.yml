@@ -1,0 +1,53 @@
+name: DevOps Delivery Pipeline
+
+on:
+  push:
+    branches: [ main, dev ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Build & Push עם תיוג דינמי
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          # יצירת תג דינמי (למשל dev-sha או main-sha)
+          TAG="${{ github.ref_name }}-${{ github.sha }}"
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+      # 2. Cluster Provisioning עם vind
+      - name: Install vind
+        run: |
+          curl -L -o vind https://github.com/loft-sh/vind/releases/latest/download/vind-linux-amd64
+          chmod +x vind
+          sudo mv vind /usr/local/bin/
+          vind create cluster my-cluster
+
+      # 3. Deployment עם Helm
+      - name: Deploy with Helm
+        run: |
+          helm dependency update ./my-app-chart
+          helm install my-app ./my-app-chart \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ env.IMAGE_TAG }} \
+            --wait --timeout 5m
