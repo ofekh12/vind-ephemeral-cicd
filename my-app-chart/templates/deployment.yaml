@@ -17,8 +17,14 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://my-app-mysql:3306/app_db?createDatabaseIfNotExist=true"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "password"
             - name: DB_HOST
-              value: "my-app-mysql" 
+              value: "my-app-mysql"
             - name: DB_PORT
               value: "3306"
             - name: DB_NAME

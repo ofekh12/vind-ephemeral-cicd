@@ -60,11 +60,10 @@ jobs:
           
           echo "Giving MySQL 60 seconds to initialize databases..."
           sleep 60
-          
+
       - name: Validation Test
         run: |
-          # פתיחת הפורט
-          kubectl port-forward service/my-app 30001:80 & 
+          kubectl port-forward svc/my-app 30001:80 &
           
           echo "Waiting for application (and MySQL) to be ready..."
           ATTEMPTS=0
