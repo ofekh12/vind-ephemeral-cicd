@@ -159,13 +159,13 @@ tolerations: []
 
 affinity: {}
 
-# MySQL Chart configuration (Subchart)
 mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
   auth:
     rootPassword: "password"
     database: "app_db"
-  image:
-    tag: "8.0"
   primary:
     persistence:
       enabled: false
