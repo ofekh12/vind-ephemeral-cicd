@@ -35,17 +35,21 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
-      - name: Install vcluster
+      # 2. יצירת קלאסטר בסיסי בעזרת Kind
+      - name: Setup Kubernetes Cluster (Kind)
+        uses: helm/kind-action@v1.10.0
+        with:
+          cluster_name: main-cluster
+
+      # 3. התקנת vcluster (אם המשימה דורשת ספציפית vcluster)
+      - name: Install and Create vcluster
         run: |
-          # הורדת ה-CLI הרשמי של vcluster
           curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
           chmod +x vcluster
           sudo mv vcluster /usr/local/bin/
           
-          # יצירת קלאסטר וירטואלי (זה עושה בדיוק את מה ש-vind היה אמור לעשות)
-          # אנחנו משתמשים ב-k3s כ-distro כי הוא הכי קל ל-CI
+          # יצירת הקלאסטר הוירטואלי בתוך Kind
           vcluster create my-vcluster --connect=false
-
       - name: Deploy with Helm
         run: |
           helm dependency update ./my-app-chart
@@ -56,8 +60,9 @@ jobs:
 
       - name: Validation Test
         run: |
-          echo "Waiting for application to be ready..."
+          kubectl port-forward service/my-app 30001:80 &
           
+          echo "Waiting for application to be ready..."
           ATTEMPTS=0
           MAX_ATTEMPTS=15
           until curl -s http://localhost:30001 | grep "200 OK"; do
