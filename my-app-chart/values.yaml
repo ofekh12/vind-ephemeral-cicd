@@ -160,12 +160,13 @@ tolerations: []
 affinity: {}
 
 mysql:
-  image:
-    repository: mysql
-    tag: "8.0"
   auth:
     rootPassword: "password"
     database: "app_db"
   primary:
     persistence:
       enabled: false
+  # הוספת משתנה סביבה בתוך ה-MySQL עצמו כדי לוודא שהוא מקבל את הסיסמה
+  image:
+    repository: mysql
+    tag: "8.0"

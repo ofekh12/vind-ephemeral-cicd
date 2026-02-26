@@ -58,7 +58,9 @@ jobs:
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${{ env.IMAGE_TAG }}
           
-          echo "Waiting for MySQL to be ready..."
+          echo "Giving MySQL 60 seconds to initialize databases..."
+          sleep 60
+          
       - name: Validation Test
         run: |
           # פתיחת הפורט
