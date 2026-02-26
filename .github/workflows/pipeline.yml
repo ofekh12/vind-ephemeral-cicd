@@ -38,9 +38,12 @@ jobs:
       # 2. Cluster Provisioning עם vind
       - name: Install vind
         run: |
-          curl -L -o vind https://github.com/loft-sh/vind/releases/latest/download/vind-linux-amd64
+          curl -L -o vind https://github.com/loft-sh/vind/releases/download/v0.0.12/vind-linux-amd64
           chmod +x vind
           sudo mv vind /usr/local/bin/
+      
+          vind --version
+
           vind create cluster my-cluster
 
       # 3. Deployment עם Helm
