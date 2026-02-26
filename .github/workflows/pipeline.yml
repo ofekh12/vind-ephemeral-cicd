@@ -50,28 +50,32 @@ jobs:
           
           # יצירת הקלאסטר הוירטואלי בתוך Kind
           vcluster create my-vcluster --connect=false
+      
       - name: Deploy with Helm
         run: |
           helm dependency update ./my-app-chart
           helm install my-app ./my-app-chart \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${{ env.IMAGE_TAG }} \
-            --wait --timeout 5m
+            --timeout 10m
 
       - name: Validation Test
         run: |
-          kubectl port-forward service/my-app 30001:80 &
+         
+          kubectl port-forward service/my-app 30001:80 & 
           
-          echo "Waiting for application to be ready..."
+          echo "Waiting for application to be ready (this can take 2-3 minutes due to MySQL)..."
           ATTEMPTS=0
-          MAX_ATTEMPTS=15
+          MAX_ATTEMPTS=30 
           until curl -s http://localhost:30001 | grep "200 OK"; do
-            echo "Waiting... ($ATTEMPTS/$MAX_ATTEMPTS)"
+            echo "Waiting for 200 OK... ($ATTEMPTS/$MAX_ATTEMPTS)"
             sleep 10
             ATTEMPTS=$((ATTEMPTS+1))
             if [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; then
-              echo "App failed to start!"
+              echo "App failed to start in time!"
+              kubectl get pods
+              kubectl logs -l app=my-app
               exit 1
             fi
           done
-          echo "Success! Application is up."
+          echo "Success! Application is up and running."
